@@ -2,6 +2,36 @@ import './style.css'
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
+import { fromFetch } from 'rxjs/fetch'
+import { of, switchMap } from 'rxjs'
+
+const Fetch = fromFetch("https://dragonball-api.com/api/characters").pipe(
+  switchMap(response => {
+    if(response.ok)
+      return response.json()
+    else
+      return of({ error: true, message: `Error ${ response.status }` });
+  })
+)
+
+  Fetch.subscribe({
+      next: (result:any) => {
+        const element = document.getElementById('app')
+        if(element){
+          result['items'].map((character:any)=>{
+            element.innerHTML+=`
+            <div>
+            <p>${character['name']}</p>
+            </div>
+            `
+          })
+        }
+      },
+      complete: () => console.log()
+    }
+  )
+
+
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
